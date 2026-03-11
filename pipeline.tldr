@@ -7,14 +7,14 @@
 			"com.tldraw.asset": 1,
 			"com.tldraw.camera": 1,
 			"com.tldraw.document": 2,
-			"com.tldraw.instance": 25,
+			"com.tldraw.instance": 26,
 			"com.tldraw.instance_page_state": 5,
 			"com.tldraw.page": 1,
 			"com.tldraw.instance_presence": 6,
 			"com.tldraw.pointer": 1,
 			"com.tldraw.shape": 4,
 			"com.tldraw.asset.bookmark": 2,
-			"com.tldraw.asset.image": 5,
+			"com.tldraw.asset.image": 6,
 			"com.tldraw.asset.video": 5,
 			"com.tldraw.shape.group": 0,
 			"com.tldraw.shape.text": 4,
@@ -526,16 +526,16 @@
 			"typeName": "binding"
 		},
 		{
-			"x": -1015.2482932184461,
-			"y": -838.0622590320199,
+			"x": -1962.6159392518414,
+			"y": -1828.869584983811,
 			"z": 1,
 			"meta": {},
 			"id": "camera:page:page",
 			"typeName": "camera"
 		},
 		{
-			"x": 2320.210529904959,
-			"y": 2086.1790773059574,
+			"x": 2344.005421262381,
+			"y": 2066.691864171192,
 			"rotation": 0,
 			"isLocked": false,
 			"opacity": 1,
@@ -1140,12 +1140,12 @@
 			"typeName": "binding"
 		},
 		{
-			"editingShapeId": "shape:r3d3lAmtM2Wsp1mpN1shC",
+			"editingShapeId": null,
 			"croppingShapeId": null,
 			"selectedShapeIds": [
-				"shape:r3d3lAmtM2Wsp1mpN1shC"
+				"shape:CFYS_lUcbgZQrOuiivuR-"
 			],
-			"hoveredShapeId": null,
+			"hoveredShapeId": "shape:CFYS_lUcbgZQrOuiivuR-",
 			"erasingShapeIds": [],
 			"hintingShapeIds": [],
 			"focusedGroupId": null,
@@ -2431,12 +2431,7 @@
 		{
 			"followingUserId": null,
 			"opacityForNextShape": 1,
-			"stylesForNextShape": {
-				"tldraw:geo": "rectangle",
-				"tldraw:size": "s",
-				"tldraw:color": "black",
-				"tldraw:horizontalAlign": "middle"
-			},
+			"stylesForNextShape": {},
 			"brush": null,
 			"scribbles": [],
 			"cursor": {
@@ -2450,8 +2445,8 @@
 			"screenBounds": {
 				"x": 0,
 				"y": 0,
-				"w": 1092.074462890625,
-				"h": 761.006591796875
+				"w": 1527.794921875,
+				"h": 872.2051391601562
 			},
 			"insets": [
 				false,
@@ -2466,7 +2461,7 @@
 			"isChatting": false,
 			"highlightedUserIds": [],
 			"isFocused": true,
-			"devicePixelRatio": 1.3350738286972046,
+			"devicePixelRatio": 1.21875,
 			"isCoarsePointer": false,
 			"isHoveringCanvas": true,
 			"openMenus": [],
@@ -2474,6 +2469,7 @@
 			"isReadonly": false,
 			"meta": {},
 			"duplicateProps": null,
+			"cameraState": "idle",
 			"id": "instance:instance",
 			"currentPageId": "page:page",
 			"typeName": "instance"
