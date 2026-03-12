@@ -6,15 +6,15 @@ import com.varshith.coderunner.dtos.QuestionCreateRequest;
 import com.varshith.coderunner.helpers.FileSystemHelper;
 import com.varshith.coderunner.helpers.Pair;
 import com.varshith.coderunner.helpers.QuestionValidator;
+import com.varshith.coderunner.models.QuestionModel;
+import com.varshith.coderunner.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.UUID;
 
@@ -24,10 +24,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class QuestionService {
 
+    @Value("${spring.testcases.base_path}")
+    private String basePath;
 
 
-    private QuestionValidator questionValidator;
-    private FileSystemHelper fileSystemHelper;
+    private final QuestionValidator questionValidator;
+    private final FileSystemHelper fileSystemHelper;
+    private final QuestionRepository questionRepository;
+
+
 
     public APIResponse<String> createQuestion(QuestionCreateRequest questionCreateRequest)  {
     /*
@@ -52,22 +57,57 @@ public class QuestionService {
         }
 
         String questionId=UUID.randomUUID().toString();
-        Boolean questionDirectoryCreation=fileSystemHelper.createQuestionDirectory(questionId);
+        boolean questionDirectoryCreation=fileSystemHelper.createQuestionDirectory(questionId);
         if(!questionDirectoryCreation){
             response.setMessage("Unable to create directory");
             response.setData("Unable to create directory for question");
             return response;
         }
 
-        Pair<Boolean, String> extractionResult= fileSystemHelper.extractZipToTemporary(questionCreateRequest.getTest_cases(), questionId);
+        Pair<Boolean, Path> extractionResult =
+                fileSystemHelper.extractZipToTemporary(
+                        questionCreateRequest.getTest_cases(),
+                        questionId
+                );
+
         if(!extractionResult.first()){
             response.setMessage("Extraction failed");
-            response.setData(extractionResult.second());
+            response.setData("Unable to extract testcases");
             return response;
         }
 
+        Path tempDir = extractionResult.second();
 
-        // Continue flow.
+        int testcaseCount = fileSystemHelper.countTestCases(tempDir);
+        questionRepository.save(
+                new QuestionModel(
+                        questionId,
+                        questionCreateRequest.getTitle(),
+                        questionCreateRequest.getMarkdown(),
+                        basePath+questionId,
+                        testcaseCount,
+                        0,
+                        0,
+                        (int)questionCreateRequest.getTime_limit()*1000,
+                        questionCreateRequest.getMemory_limit(),
+                        questionCreateRequest.getTopics(),
+                        QuestionModel.Difficulty.valueOf(questionCreateRequest.getDifficulty())
+                )
+        );
+        // Saving to db done now move from temp to real location
+        boolean moveResult = fileSystemHelper.moveTempToQuestionDirectory(tempDir, questionId);
+
+        if(!moveResult){
+            questionRepository.deleteById(questionId);
+
+            response.setMessage("Failed to move testcases");
+            response.setData("Filesystem error while moving extracted files");
+            return response;
+        }
+        response.setSuccess(true);
+        response.setMessage("Question created successfully");
+        response.setData(questionId);
+
         return response;
     }
 }

@@ -53,8 +53,8 @@ public class QuestionValidator {
             result.setSecondVariable("Question Test Cases size cannot be greater than maximum");
             return result;
         }
-
-        if (!Set.of("EASY","MEDIUM","HARD").contains(question.getDifficulty())) {
+        System.out.println(question.getDifficulty());
+        if (question.getDifficulty() == null || question.getDifficulty().isBlank()) {
             result.setSecondVariable("Question Difficulty cannot be empty");
             return result;
         }

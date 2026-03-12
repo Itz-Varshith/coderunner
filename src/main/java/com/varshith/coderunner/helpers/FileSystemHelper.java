@@ -13,45 +13,85 @@ import java.util.zip.ZipInputStream;
 @Service
 public class FileSystemHelper {
 
-    @Value("$spring.testcases.base_path")
+    @Value("${spring.testcases.base_path}")
     private String basePath;
+
+    public int countTestCases(Path tempDir) {
+        Path inputDir = tempDir.resolve("testcases").resolve("input");
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(inputDir)) {
+            int count = 0;
+            for (Path path : stream) {
+                if (Files.isRegularFile(path)) {
+                    count++;
+                }
+            }
+            return count;
+        } catch (IOException e) {
+            return 0;
+        }
+    }
 
     public boolean createQuestionDirectory(String questionId) {
         Path path1= Paths.get(basePath,questionId);
-        Path path2= Paths.get(basePath,questionId);
+        System.out.println(path1);
         try{
             Files.createDirectories(path1);
-            Files.createDirectories(path2);
         } catch (IOException e) {
+            System.out.println("Unable to create directory");
             return false;
         }
         return true;
     }
 
-    public Pair<Boolean, String> extractZipToTemporary(MultipartFile zipFile, String questionId) {
+    public Pair<Boolean, Path> extractZipToTemporary(MultipartFile zipFile, String questionId) {
 
         try {
             Path tempDir = Files.createTempDirectory("question_" + questionId);
+
             try (ZipInputStream zis = new ZipInputStream(zipFile.getInputStream())) {
+
                 ZipEntry entry;
+
                 while ((entry = zis.getNextEntry()) != null) {
+
                     Path filePath = tempDir.resolve(entry.getName()).normalize();
+
                     // Zip Slip protection
                     if (!filePath.startsWith(tempDir)) {
-                        return new Pair<>(false, "Invalid zip entry detected");
+                        return new Pair<>(false, null);
                     }
+
                     if (entry.isDirectory()) {
                         Files.createDirectories(filePath);
                         continue;
                     }
+
                     Files.createDirectories(filePath.getParent());
+
                     Files.copy(zis, filePath, StandardCopyOption.REPLACE_EXISTING);
                 }
             }
 
+            return new Pair<>(true, tempDir);
+
         } catch (IOException e) {
-            return new Pair<>(false, "Error extracting zip file");
+            return new Pair<>(false, null);
         }
-        return new Pair<>(true, "question_" + questionId);
+    }
+
+    public boolean moveTempToQuestionDirectory(Path tempDir, String questionId) {
+
+        try {
+
+            Path finalDir = Paths.get(basePath, questionId);
+
+            Files.move(tempDir, finalDir, StandardCopyOption.REPLACE_EXISTING);
+
+            return true;
+
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
