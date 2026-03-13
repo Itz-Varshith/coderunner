@@ -17,9 +17,12 @@ import com.varshith.coderunner.repository.SubmissionRepository;
 import com.varshith.coderunner.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class SubmissionService {
     private final LanguageRepository languageRepository;
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public APIResponse<String> createSubmission(SubmissionCreateRequest submissionCreateRequest) {
         APIResponse<String> response = new APIResponse<>();
@@ -63,11 +67,23 @@ public class SubmissionService {
         submissionModel.setCode(submissionCreateRequest.getCode().trim());
         submissionModel.setStatus(SubmissionModel.Status.PENDING);
 
-        submissionRepository.save(submissionModel);
-        log.info("Submission {} saved to database", submissionModel.getSubmissionId());
+        SubmissionModel saved = submissionRepository.save(submissionModel);
+        log.info("Submission {} saved to database", saved.getSubmissionId());
 
         // Step - 3
-
+        Map<String, String> message=new HashMap<>();
+        message.put("submissionId", String.valueOf(saved.getSubmissionId()));
+        String languageName=language.getLanguageName();
+        redisTemplate.opsForStream().add(
+                "submission-stream:"+languageName,
+                message
+        );
+        log.info("Submission {} added to stream {}",
+                (int)saved.getSubmissionId(),
+                "submission-stream:" + languageName);
+        response.setMessage("Submission successful");
+        response.setSuccess(true);
+        response.setData("");
         return response;
     }
 }

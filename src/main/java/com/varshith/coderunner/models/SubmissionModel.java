@@ -53,6 +53,15 @@ public class SubmissionModel {
     private int memoryTaken;
 
     private long submittedAt;
-
     private String judgeMessage;
+    @PrePersist
+    public void setDefaultValues() {
+        this.submittedAt = System.currentTimeMillis();
+        this.judgeMessage = "Submission validation pending";
+
+
+
+    }
+
+
 }

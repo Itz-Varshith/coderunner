@@ -18,14 +18,13 @@ public class SubmissionController {
 
     private final SubmissionService submissionService;
 
-    @PostMapping("/code")
-    public ResponseEntity<APIResponse<String>> submitCodefile(@RequestBody SubmissionCreateRequest submissionCreateRequest) {
+    @PostMapping
+    public ResponseEntity<APIResponse<String>> submitCode(@RequestBody SubmissionCreateRequest submissionCreateRequest) {
 
         APIResponse<String> response=submissionService.createSubmission(submissionCreateRequest);
-        if(!response.isSuccess()){
+        if(!response.isSuccess()) {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-
         return new  ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 }
