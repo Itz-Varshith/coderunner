@@ -4,12 +4,11 @@ package com.varshith.coderunner.service;
 import com.varshith.coderunner.dtos.APIResponse;
 import com.varshith.coderunner.dtos.QuestionCreateRequest;
 import com.varshith.coderunner.helpers.FileSystemHelper;
-import com.varshith.coderunner.helpers.Pair;
+import com.varshith.coderunner.helpers.ValidatorResult;
 import com.varshith.coderunner.helpers.QuestionValidator;
 import com.varshith.coderunner.models.QuestionModel;
 import com.varshith.coderunner.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +48,7 @@ public class QuestionService {
         response.setDate(new Date());
         response.setSuccess(false);
 
-        Pair<Boolean, String> questionValidationResult=questionValidator.validateQuestionData(questionCreateRequest);
+        ValidatorResult<Boolean, String> questionValidationResult=questionValidator.validateQuestionData(questionCreateRequest);
         if(!questionValidationResult.first()){
             response.setData(questionValidationResult.second());
             response.setMessage("Invalid data provided");
@@ -64,7 +63,7 @@ public class QuestionService {
             return response;
         }
 
-        Pair<Boolean, Path> extractionResult =
+        ValidatorResult<Boolean, Path> extractionResult =
                 fileSystemHelper.extractZipToTemporary(
                         questionCreateRequest.getTest_cases(),
                         questionId

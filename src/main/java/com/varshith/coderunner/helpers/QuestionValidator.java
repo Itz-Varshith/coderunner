@@ -3,20 +3,19 @@ package com.varshith.coderunner.helpers;
 
 import com.varshith.coderunner.dtos.QuestionCreateRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-@Service
+@Component
 public class QuestionValidator {
     @Value("${spring.testcases.max_size}")
     private double maxTestCaseSize;
-    public Pair<Boolean, String> validateQuestionData(QuestionCreateRequest question) {
-        Pair<Boolean, String> result= new Pair<Boolean, String>(false, "Unable to process");
+    public ValidatorResult<Boolean, String> validateQuestionData(QuestionCreateRequest question) {
+        ValidatorResult<Boolean, String> result= new ValidatorResult<Boolean, String>(false, "Unable to process");
         if (question == null){
             result.setSecondVariable("Question data cannot be null");
             return result;
@@ -59,7 +58,7 @@ public class QuestionValidator {
             return result;
         }
 
-        if(validateQuestionDataBytes((question.getTest_cases()))){
+        if(!validateQuestionDataBytes((question.getTest_cases()))){
             result.setSecondVariable("Question Test Cases Format invalid");
             return result;
         }
@@ -74,20 +73,21 @@ public class QuestionValidator {
 
         int judgeFound = 0;
         try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
+
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
-                if (entry.isDirectory()) return false;
+                if (entry.isDirectory()) continue;
                 String name = entry.getName();
                 System.out.println("File inside zip: " + name);
 
                 // judge.cpp
-                if (name.equals("judge.cpp")) {
+                if (name.equals("testcases/judge.cpp")) {
                     judgeFound++;
                     continue;
                 }
 
                 // input testcases
-                if (name.startsWith("input/") && name.endsWith(".txt")) {
+                if (name.startsWith("testcases/input/") && name.endsWith(".txt")) {
                     continue;
                 }
 

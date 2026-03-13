@@ -44,7 +44,7 @@ public class FileSystemHelper {
         return true;
     }
 
-    public Pair<Boolean, Path> extractZipToTemporary(MultipartFile zipFile, String questionId) {
+    public ValidatorResult extractZipToTemporary(MultipartFile zipFile, String questionId) {
 
         try {
             Path tempDir = Files.createTempDirectory("question_" + questionId);
@@ -59,7 +59,7 @@ public class FileSystemHelper {
 
                     // Zip Slip protection
                     if (!filePath.startsWith(tempDir)) {
-                        return new Pair<>(false, null);
+                        return new ValidatorResult(false, null);
                     }
 
                     if (entry.isDirectory()) {
@@ -73,10 +73,10 @@ public class FileSystemHelper {
                 }
             }
 
-            return new Pair<>(true, tempDir);
+            return new ValidatorResult(true, tempDir);
 
         } catch (IOException e) {
-            return new Pair<>(false, null);
+            return new ValidatorResult(false, null);
         }
     }
 
