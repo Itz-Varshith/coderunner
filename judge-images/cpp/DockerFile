@@ -1,0 +1,6 @@
+FROM gcc:13
+
+WORKDIR /workspace
+
+RUN useradd -m runner
+USER runner

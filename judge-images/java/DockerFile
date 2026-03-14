@@ -1,0 +1,7 @@
+FROM openjdk:21-slim
+
+WORKDIR /workspace
+
+RUN useradd -m runner
+
+USER runner
