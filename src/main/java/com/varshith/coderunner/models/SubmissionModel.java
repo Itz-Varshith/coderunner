@@ -43,7 +43,7 @@ public class SubmissionModel {
     @JoinColumn(name="id")
     private UserModel user;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String code;
 
     @Enumerated(EnumType.STRING)
