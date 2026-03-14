@@ -73,14 +73,13 @@ public class SubmissionService {
         // Step - 3
         Map<String, String> message=new HashMap<>();
         message.put("submissionId", String.valueOf(saved.getSubmissionId()));
-        String languageName=language.getLanguageName();
         redisTemplate.opsForStream().add(
-                "submission-stream:"+languageName,
+                "submission-stream",
                 message
         );
         log.info("Submission {} added to stream {}",
                 (int)saved.getSubmissionId(),
-                "submission-stream:" + languageName);
+                "submission-stream");
         response.setMessage("Submission successful");
         response.setSuccess(true);
         response.setData("");
