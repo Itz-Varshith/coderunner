@@ -26,7 +26,7 @@ public class SubmissionDispatcher {
         this.submissionRepository = submissionRepository;
     }
     // Dispatcher fetches data from database and sends the request to corresponding executor class
-    public void dispatch(String submissionId){
+    public boolean dispatch(String submissionId){
         Long submissionIdLong= Long.parseLong(submissionId);
 
         SubmissionModel submission=submissionRepository.findById(submissionIdLong).orElse(null);
@@ -44,7 +44,7 @@ public class SubmissionDispatcher {
             return;
         }
 
-        codeExecutor.execute(submission);
+        return codeExecutor.execute(submission);
 
     }
 

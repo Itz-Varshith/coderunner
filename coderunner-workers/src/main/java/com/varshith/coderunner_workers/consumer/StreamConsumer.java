@@ -66,14 +66,18 @@ public class StreamConsumer {
                             (String) message.getValue().get("submissionId");
                     log.info("Submission processing: {}", submissionId);
                     // execute submission here
-                    submissionDispatcher.dispatch(submissionId);
+                    boolean result=submissionDispatcher.dispatch(submissionId);
+                    if(result) {
+                        redisTemplate.opsForStream().acknowledge(
+                                STREAM,
+                                GROUP,
+                                message.getId()
+                        );
+                        log.info("Acknowledged acknowledgement: {}", submissionId);
+                    }else{
+                        log.error("Failure in code execution acknowledgement denied");
+                    }
 
-                    redisTemplate.opsForStream().acknowledge(
-                            STREAM,
-                            GROUP,
-                            message.getId()
-                    );
-                    log.info("Acknowledged acknowledgement: {}", submissionId);
                 }
             }
         }

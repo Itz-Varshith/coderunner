@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 public interface CodeExecutor {
 
     String getLanguage();
-    void execute(SubmissionModel submission);
+    boolean execute(SubmissionModel submission);
 
 }
