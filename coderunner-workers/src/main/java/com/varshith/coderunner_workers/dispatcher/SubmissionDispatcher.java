@@ -33,7 +33,7 @@ public class SubmissionDispatcher {
 
         if(submission==null){
             log.info("Submission id {} not found", submissionId);
-            return;
+            return false;
         }
 
         String language=submission.getLanguage().getLanguageName();
@@ -41,7 +41,7 @@ public class SubmissionDispatcher {
 
         if(codeExecutor==null){
             log.info("No code executor found for language {}",language);
-            return;
+            return false;
         }
 
         return codeExecutor.execute(submission);
