@@ -2,6 +2,7 @@ package com.varshith.coderunner_workers.executors;
 
 
 import com.varshith.coderunner_workers.models.SubmissionModel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,12 @@ import java.nio.file.StandardCopyOption;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CppExecutor implements CodeExecutor {
+
+    private final DockerExecutor dockerExecutor;
+
+
 
     public String getLanguage(){
         return "cpp";
@@ -38,12 +44,24 @@ public class CppExecutor implements CodeExecutor {
         * */
 
 //        Step - 1
-        String prefixForTempDirectory="coderunner-"+ submission.getSubmissionId();
+        //        Step - 1
+        String prefixForTempDirectory = "coderunner-" + submission.getSubmissionId() + "-";
         Path tempDirectory;
-        try{
-            tempDirectory = Files.createTempDirectory(prefixForTempDirectory);
-        } catch (IOException err){
-            log.error("Temporary directory creation error");
+        try {
+            // Get the current working directory of the Java application
+            Path baseTempDir = Paths.get(System.getProperty("user.dir"), "coderunner_workspaces");
+
+            // Ensure this base directory exists
+            if (!Files.exists(baseTempDir)) {
+                Files.createDirectories(baseTempDir);
+            }
+
+            // Create the specific temp dir INSIDE our dedicated folder instead of the OS /tmp
+            tempDirectory = Files.createTempDirectory(baseTempDir, prefixForTempDirectory);
+            log.info("Created temp workspace at: {}", tempDirectory.toAbsolutePath());
+
+        } catch (IOException err) {
+            log.error("Temporary directory creation error", err);
             return false;
         }
 
@@ -52,7 +70,6 @@ public class CppExecutor implements CodeExecutor {
             log.error("No testcases found denied execution");
             return false;
         }
-
         Path testCasesLocation= Paths.get(testcasesPath);
 
         if(!Files.exists(testCasesLocation)){
@@ -76,7 +93,7 @@ public class CppExecutor implements CodeExecutor {
             return false;
         }
 
-//         Steo 1.5
+//         Step 1.5
         String code = submission.getCode();
 
         Path userCodeFile = tempDirectory.resolve("user_code.cpp");
@@ -87,7 +104,66 @@ public class CppExecutor implements CodeExecutor {
             log.error("Failed to write user code", err);
             return false;
         }
+//        Step 2
+        String script = """
+#!/bin/bash
 
+USER_CODE="user_code.cpp"
+JUDGE_CODE="judge.cpp"
+
+USER_EXEC="user_program"
+JUDGE_EXEC="judge_program"
+
+TESTCASE_DIR="./input"
+
+USER_OUTPUT="user_output.txt"
+USER_ERROR="runtime_error.txt"
+
+g++ "$USER_CODE" -O2 -std=c++17 -o "$USER_EXEC"
+if [ $? -ne 0 ]; then
+    echo "USER_COMPILATION_ERROR"
+    exit 1
+fi
+
+g++ "$JUDGE_CODE" -O2 -std=c++17 -o "$JUDGE_EXEC"
+if [ $? -ne 0 ]; then
+    echo "JUDGE_COMPILATION_ERROR"
+    exit 1
+fi
+
+for testcase in "$TESTCASE_DIR"/*.txt
+do
+    ./"$USER_EXEC" < "$testcase" > "$USER_OUTPUT" 2> "$USER_ERROR"
+
+    STATUS=$?
+
+    if [ $STATUS -ne 0 ]; then
+        echo "RUNTIME_ERROR"
+        exit 1
+    fi
+
+    ./"$JUDGE_EXEC" "$testcase" < "$USER_OUTPUT"
+
+    if [ $? -ne 0 ]; then
+        echo "WRONG_ANSWER"
+        exit 1
+    fi
+done
+
+echo "ACCEPTED"
+""";
+
+        Path runScriptFile = tempDirectory.resolve("run.sh");
+
+        try {
+            Files.writeString(runScriptFile, script);
+        } catch (IOException err) {
+            log.error("Failed to write Run script", err);
+            return false;
+        }
+
+//        Pass the directory along with the image name to the docker executor.
+        String result=dockerExecutor.dockerExecute(tempDirectory, "judge-cpp");
         log.info("Done execution");
         return true;
     }

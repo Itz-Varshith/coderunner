@@ -29,6 +29,17 @@
 	<properties>
 		<java.version>25</java.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.github.docker-java</groupId>
+				<artifactId>docker-java-bom</artifactId>
+				<version>3.3.6</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -55,14 +66,13 @@
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java</artifactId>
-            <version>3.3.6</version>
+
         </dependency>
 
         <dependency>
             <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java-transport-httpclient5</artifactId>
-            <version>3.3.6</version>
-        </dependency>
+            <artifactId>docker-java-transport-zerodep</artifactId>
+            <version>3.3.4</version> </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

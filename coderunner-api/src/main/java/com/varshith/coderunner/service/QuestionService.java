@@ -83,7 +83,7 @@ public class QuestionService {
                         questionId,
                         questionCreateRequest.getTitle(),
                         questionCreateRequest.getMarkdown(),
-                        basePath+questionId,
+                        basePath+questionId+"/testcases",
                         testcaseCount,
                         0,
                         0,
