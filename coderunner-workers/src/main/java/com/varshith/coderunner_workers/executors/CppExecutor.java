@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -78,20 +80,20 @@ public class CppExecutor implements CodeExecutor {
         }
         // This approach for file copying is ok but can be easily optimized using simple docker mound directly instead of
         // using separate copy to temp like we are now.
-        try{
-            Files.walk(testCasesLocation)
-                    .forEach(source -> {
-                        Path dest = tempDirectory.resolve(testCasesLocation.relativize(source));
-                        try {
-                            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-        }catch(IOException err){
-            log.error("File copy failed");
-            return false;
-        }
+//        try{
+//            Files.walk(testCasesLocation)
+//                    .forEach(source -> {
+//                        Path dest = tempDirectory.resolve(testCasesLocation.relativize(source));
+//                        try {
+//                            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
+//                        } catch (IOException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                    });
+//        }catch(IOException err){
+//            log.error("File copy failed");
+//            return false;
+//        }
 
 //         Step 1.5
         String code = submission.getCode();
@@ -105,54 +107,24 @@ public class CppExecutor implements CodeExecutor {
             return false;
         }
 //        Step 2
-        String script = """
-#!/bin/bash
+        InputStream is=getClass().getClassLoader().getResourceAsStream("scripts/cpp_run.sh");
 
-USER_CODE="user_code.cpp"
-JUDGE_CODE="judge.cpp"
+        String script="";
 
-USER_EXEC="user_program"
-JUDGE_EXEC="judge_program"
-
-TESTCASE_DIR="./input"
-
-USER_OUTPUT="user_output.txt"
-USER_ERROR="runtime_error.txt"
-
-g++ "$USER_CODE" -O2 -std=c++17 -o "$USER_EXEC"
-if [ $? -ne 0 ]; then
-    echo "USER_COMPILATION_ERROR"
-    exit 1
-fi
-
-g++ "$JUDGE_CODE" -O2 -std=c++17 -o "$JUDGE_EXEC"
-if [ $? -ne 0 ]; then
-    echo "JUDGE_COMPILATION_ERROR"
-    exit 1
-fi
-
-for testcase in "$TESTCASE_DIR"/*.txt
-do
-    ./"$USER_EXEC" < "$testcase" > "$USER_OUTPUT" 2> "$USER_ERROR"
-
-    STATUS=$?
-
-    if [ $STATUS -ne 0 ]; then
-        echo "RUNTIME_ERROR"
-        exit 1
-    fi
-
-    ./"$JUDGE_EXEC" "$testcase" < "$USER_OUTPUT"
-
-    if [ $? -ne 0 ]; then
-        echo "WRONG_ANSWER"
-        exit 1
-    fi
-done
-
-echo "ACCEPTED"
-""";
-
+        try {
+            if(is==null){
+                log.info("Script file for cpp not found");
+                return false;
+            }
+            script=new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException err) {
+            log.error("Failed to read script", err);
+            return false;
+        }
+        String tl= submission.getQuestion().getTimeLimit() +"s";
+        String ml=String.valueOf(submission.getQuestion().getMemoryLimit());
+        script=script.replace("{{TIME_LIMIT}}", tl);
+        script=script.replace("{{MEMORY_LIMIT}}", ml);
         Path runScriptFile = tempDirectory.resolve("run.sh");
 
         try {
@@ -161,9 +133,9 @@ echo "ACCEPTED"
             log.error("Failed to write Run script", err);
             return false;
         }
-
+//        Mention the improvement related to avoiding file copy and directly mounting the testcases path to the docker container
 //        Pass the directory along with the image name to the docker executor.
-        String result=dockerExecutor.dockerExecute(tempDirectory, "judge-cpp");
+        String result=dockerExecutor.dockerExecute(tempDirectory,testCasesLocation,  "judge-cpp");
         log.info("Done execution");
         return true;
     }
