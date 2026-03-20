@@ -78,22 +78,6 @@ public class CppExecutor implements CodeExecutor {
             log.error("Testcases for the question with id {} do not exist on device", submission.getQuestion().getQuestionId());
             return false;
         }
-        // This approach for file copying is ok but can be easily optimized using simple docker mound directly instead of
-        // using separate copy to temp like we are now.
-//        try{
-//            Files.walk(testCasesLocation)
-//                    .forEach(source -> {
-//                        Path dest = tempDirectory.resolve(testCasesLocation.relativize(source));
-//                        try {
-//                            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
-//                        } catch (IOException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                    });
-//        }catch(IOException err){
-//            log.error("File copy failed");
-//            return false;
-//        }
 
 //         Step 1.5
         String code = submission.getCode();

@@ -4,7 +4,7 @@ USER_CODE="user_code.cpp"
 JUDGE_CODE="testcase/judge.cpp"
 
 USER_EXEC="user_program"
-JUDGE_EXEC="judge_program"
+JUDGE_EXEC="testcase/judge_program"
 
 TESTCASE_DIR="./testcase/input"
 
@@ -16,7 +16,6 @@ TIME_LIMIT={{TIME_LIMIT}}
 MEMORY_LIMIT={{MEMORY_LIMIT}}
 
 
-
 # 1. Compile User Code
 g++ "$USER_CODE" -O2 -std=c++17 -o "$USER_EXEC"
 if [ $? -ne 0 ]; then
@@ -25,11 +24,11 @@ if [ $? -ne 0 ]; then
 fi
 
 # 2. Compile Judge Code
-g++ "$JUDGE_CODE" -O2 -std=c++17 -o "$JUDGE_EXEC"
-if [ $? -ne 0 ]; then
-    echo "JUDGE_COMPILATION_ERROR"
-    exit 1
-fi
+#g++ "$JUDGE_CODE" -O2 -std=c++17 -o "$JUDGE_EXEC"
+#if [ $? -ne 0 ]; then
+#    echo "JUDGE_COMPILATION_ERROR"
+#    exit 1
+#fi
 
 # 3. Execute Against Test Cases
 for testcase in "$TESTCASE_DIR"/*.txt

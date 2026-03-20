@@ -20,6 +20,42 @@ public class DockerExecutor {
 
     private final DockerClient dockerClient;
 
+    public boolean compileJudge(Path testcasesDir) {
+        try {
+            log.info("Compiling judge binary in directory: {}", testcasesDir);
+
+
+            CreateContainerResponse container = dockerClient.createContainerCmd("judge-cpp")
+                    .withCmd("/bin/bash", "-c", "g++ /testcases/judge.cpp -O2 -std=c++17 -o /testcases/judge_program")
+                    .withHostConfig(
+                            HostConfig.newHostConfig()
+                                    .withBinds(new Bind(testcasesDir.toString(), new Volume("/testcases")))
+                    )
+                    .exec();
+
+            dockerClient.startContainerCmd(container.getId()).exec();
+
+
+            int statusCode = dockerClient.waitContainerCmd(container.getId())
+                    .start()
+                    .awaitStatusCode();
+
+            // Cleanup the compiler container
+            dockerClient.removeContainerCmd(container.getId()).withForce(true).exec();
+
+            if (statusCode != 0) {
+                log.error("Judge compilation failed with exit code: {}", statusCode);
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            log.error("Docker error during judge compilation", e);
+            return false;
+        }
+    }
+
+
     public String dockerExecute(Path directory, Path testcasesPath, String image_name){
 
         try {
