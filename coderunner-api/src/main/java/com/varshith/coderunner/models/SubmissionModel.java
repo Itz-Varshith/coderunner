@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+/**
+ * Model file for Submission, contains direct user code as TEXT with length limit checked on the server side by
+ * SubmissionValidator.java, and carries all the metadata related to a submission.
+ * */
 
 @Data
 @AllArgsConstructor

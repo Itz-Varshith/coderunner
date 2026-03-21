@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Model file for UserModel simple cause there is no thoughts on adding auth to the system yet.
+ * */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
