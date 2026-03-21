@@ -10,12 +10,18 @@ import java.nio.file.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Main Helper file for interacting with filesystem does works like saving files to filesystem and also unzipping etc.
+ * */
+
 @Service
 public class FileSystemHelper {
 
+//    Base directory for Question testcases, can be changed in config.
     @Value("${spring.testcases.base_path}")
     private String basePath;
 
+//    Helper to count the number of testcases for a question used in QuestionService to save to DB.
     public int countTestCases(Path tempDir) {
         Path inputDir = tempDir.resolve("testcases").resolve("input");
 
@@ -32,6 +38,8 @@ public class FileSystemHelper {
         }
     }
 
+//    Creates base directory for saving testcases of a question based on question_id, format remains same for all questions,
+//    uses basePath/question_<questionID>.
     public boolean createQuestionDirectory(String questionId) {
         Path path1= Paths.get(basePath,questionId);
         System.out.println(path1);
@@ -44,22 +52,20 @@ public class FileSystemHelper {
         return true;
     }
 
-    public ValidatorResult extractZipToTemporary(MultipartFile zipFile, String questionId) {
+//    Extraction from ZIP uses temporary staging to temp which is deleted after job completes, (two stage pattern to avoid
+//    questions in DB with no testcases and testcases in filesystem with no question).
+    public ValidatorResult<Boolean, Path> extractZipToTemporary(MultipartFile zipFile, String questionId) {
 
         try {
             Path tempDir = Files.createTempDirectory("question_" + questionId);
 
             try (ZipInputStream zis = new ZipInputStream(zipFile.getInputStream())) {
-
                 ZipEntry entry;
-
                 while ((entry = zis.getNextEntry()) != null) {
-
                     Path filePath = tempDir.resolve(entry.getName()).normalize();
 
-                    // Zip Slip protection
                     if (!filePath.startsWith(tempDir)) {
-                        return new ValidatorResult(false, null);
+                        return new ValidatorResult<>(false, null);
                     }
 
                     if (entry.isDirectory()) {
@@ -73,13 +79,14 @@ public class FileSystemHelper {
                 }
             }
 
-            return new ValidatorResult(true, tempDir);
+            return new ValidatorResult<>(true, tempDir);
 
         } catch (IOException e) {
-            return new ValidatorResult(false, null);
+            return new ValidatorResult<>(false, null);
         }
     }
 
+//    Moves question unpacked testcase data from temp Directory to original question directory.
     public boolean moveTempToQuestionDirectory(Path tempDir, String questionId) {
 
         try {

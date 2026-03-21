@@ -8,15 +8,20 @@ import com.varshith.coderunner.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/**
+ * Validator for submission, checks for all the required fields in the database.
+ * */
 
 @Component
 @RequiredArgsConstructor
 public class SubmissionValidator {
 
+//    Used constructor based injection for all the immediately required classes.
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
     private final LanguageRepository languageRepository;
 
+//    Main function for validation returns Boolean and String as a ValidatorResult object.
     public ValidatorResult<Boolean, String> validateSubmission(SubmissionCreateRequest submissionCreateRequest) {
 
         String language = submissionCreateRequest.getLanguage();
