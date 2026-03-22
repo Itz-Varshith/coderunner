@@ -1,13 +1,11 @@
-package com.varshith.coderunner_workers.executors;
+package com.varshith.coderunner_workers.executors.bash_executors;
 
 import com.varshith.coderunner_workers.helpers.PrepareScript;
 import com.varshith.coderunner_workers.models.SubmissionModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileSystemUtils;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +13,7 @@ import java.nio.file.Paths;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PythonExecutor implements CodeExecutor {
+public class PythonExecutorBash implements CodeExecutorBash {
 
     private final DockerExecutor dockerExecutor;
     private final PrepareScript prepareScript;

@@ -96,6 +96,9 @@ public class DockerExecutor {
         return "Well! we are done";
     }
 
+    public String dockerExecutePython(Path directory, Path testcasesPath, String image_name, String command){
+        return "";
+    }
 }
 
 

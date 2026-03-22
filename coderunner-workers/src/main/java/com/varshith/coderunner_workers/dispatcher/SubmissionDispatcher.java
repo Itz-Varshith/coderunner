@@ -1,19 +1,14 @@
 package com.varshith.coderunner_workers.dispatcher;
 
 
-import com.varshith.coderunner_workers.executors.CodeExecutor;
+import com.varshith.coderunner_workers.executors.bash_executors.CodeExecutorBash;
 import com.varshith.coderunner_workers.models.SubmissionModel;
 import com.varshith.coderunner_workers.repository.SubmissionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -21,14 +16,14 @@ import java.util.stream.Collectors;
 @Component
 public class SubmissionDispatcher {
 
-    private final Map<String, CodeExecutor> codeExecutors;
+    private final Map<String, CodeExecutorBash> codeExecutors;
     private final SubmissionRepository submissionRepository;
     private final JudgeBootstrapCompiler judgeBootstrapCompiler;
 
 
-    public SubmissionDispatcher(List<CodeExecutor> codeExecutors,  SubmissionRepository submissionRepository, JudgeBootstrapCompiler judgeBootstrapCompiler) {
-        this.codeExecutors = codeExecutors.stream()
-                .collect(Collectors.toMap(CodeExecutor::getLanguage, Function.identity()));
+    public SubmissionDispatcher(List<CodeExecutorBash> codeExecutorBashes, SubmissionRepository submissionRepository, JudgeBootstrapCompiler judgeBootstrapCompiler) {
+        this.codeExecutors = codeExecutorBashes.stream()
+                .collect(Collectors.toMap(CodeExecutorBash::getLanguage, Function.identity()));
 
         this.submissionRepository = submissionRepository;
         this.judgeBootstrapCompiler= judgeBootstrapCompiler;
@@ -49,9 +44,9 @@ public class SubmissionDispatcher {
         }
 
         String language=submission.getLanguage().getLanguageName();
-        CodeExecutor codeExecutor=codeExecutors.get(language);
+        CodeExecutorBash codeExecutorBash =codeExecutors.get(language);
 
-        if(codeExecutor==null){
+        if(codeExecutorBash ==null){
             log.info("No code executor found for language {}",language);
             return false;
         }
@@ -64,7 +59,7 @@ public class SubmissionDispatcher {
             return false;
         }
 
-        return codeExecutor.execute(submission);
+        return codeExecutorBash.execute(submission);
 
     }
 

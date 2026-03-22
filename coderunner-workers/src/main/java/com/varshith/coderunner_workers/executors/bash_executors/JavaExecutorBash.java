@@ -1,6 +1,7 @@
-package com.varshith.coderunner_workers.executors;
+package com.varshith.coderunner_workers.executors.bash_executors;
 
 
+import com.varshith.coderunner_workers.executors.DockerExecutor;
 import com.varshith.coderunner_workers.helpers.JavaClassNameExtractor;
 import com.varshith.coderunner_workers.helpers.PrepareScript;
 import com.varshith.coderunner_workers.models.SubmissionModel;
@@ -9,17 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JavaExecutor implements CodeExecutor {
+public class JavaExecutorBash implements CodeExecutorBash {
 
     private final DockerExecutor dockerExecutor;
     private final JavaClassNameExtractor javaClassNameExtractor;
