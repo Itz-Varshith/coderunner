@@ -34,6 +34,7 @@ def set_limits(memory_limit_mb):
 # ------------------ COMPILATION ------------------
 
 def compile_code(cmd):
+    print("Compiling Code")
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         return False, result.stderr[:500]
@@ -55,8 +56,10 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
 
     max_time = 0
     total_tests = len(test_files)
-
+    cnt=1;
     for idx, tc in enumerate(test_files, 1):
+        print(f"Running testcase #{cnt}")
+        cnt=cnt+1
         tc_path = os.path.join(testcase_dir, tc)
 
         with open(tc_path, "r") as stdin_f:

@@ -1,6 +1,8 @@
 package com.varshith.coderunner_workers.consumer;
 
-import com.varshith.coderunner_workers.dispatcher.SubmissionDispatcher;
+import com.varshith.coderunner_workers.dispatcher.SubmissionDispatcherBash;
+import com.varshith.coderunner_workers.dispatcher.SubmissionDispatcherBash;
+import com.varshith.coderunner_workers.dispatcher.SubmissionDispatcherPython;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,8 @@ public class StreamConsumer {
     private int threadCount;
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final SubmissionDispatcher submissionDispatcher;
+    private final SubmissionDispatcherBash submissionDispatcherBash;
+    private final SubmissionDispatcherPython  submissionDispatcherPython;
 
     private ExecutorService executor;
     private Semaphore availableWorkers;
@@ -67,6 +70,7 @@ public class StreamConsumer {
     }
 
     private void startReading() {
+
         while (isRunning) {
             try {
 
@@ -108,7 +112,7 @@ public class StreamConsumer {
             long startTimeMs = System.currentTimeMillis();
 
 
-            boolean result = submissionDispatcher.dispatch(submissionId);
+            boolean result = submissionDispatcherPython.dispatch(submissionId);
 
             long endTimeMs = System.currentTimeMillis();
             long totalTimeTaken = endTimeMs - startTimeMs;

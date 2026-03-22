@@ -96,8 +96,72 @@ public class DockerExecutor {
         return "Well! we are done";
     }
 
-    public String dockerExecutePython(Path directory, Path testcasesPath, String image_name, String command){
-        return "";
+    public String dockerExecutePython(
+            Path directory,
+            Path testcasesPath,
+            String image_name,
+            String command
+    ) {
+        try {
+            dockerClient.pingCmd().exec();
+        } catch (Exception e) {
+            log.error("Docker is not running!");
+            return "";
+        }
+
+        try {
+
+            CreateContainerResponse container =
+                    dockerClient.createContainerCmd(image_name)
+                            .withCmd("/bin/sh", "-c", command)
+                            .withWorkingDir("/workspace")
+                            .withHostConfig(
+                                    HostConfig.newHostConfig()
+                                            .withBinds(
+                                                    new Bind(directory.toString(), new Volume("/workspace")),
+                                                    new Bind(testcasesPath.toString(), new Volume("/workspace/testcase"), AccessMode.ro)
+                                            )
+                            )
+                            .exec();
+
+            String containerId = container.getId();
+
+
+            dockerClient.startContainerCmd(containerId).exec();
+
+
+            LogContainerCmd logCmd =
+                    dockerClient.logContainerCmd(containerId)
+                            .withStdOut(true)
+                            .withStdErr(true)
+                            .withFollowStream(true);
+
+            logCmd.exec(new LogContainerResultCallback() {
+                @Override
+                public void onNext(Frame frame) {
+                    String log = new String(frame.getPayload());
+                    System.out.print(log); // 🔥 live streaming
+                }
+            });
+
+
+            Integer exitCode = dockerClient.waitContainerCmd(containerId)
+                    .start()
+                    .awaitStatusCode();
+
+            log.info("Container exited with code: {}", exitCode);
+
+
+            dockerClient.removeContainerCmd(containerId)
+                    .withForce(true)
+                    .exec();
+
+            return "Execution completed with exit code: " + exitCode;
+
+        } catch (Exception e) {
+            log.error("Error during docker execution", e);
+            return "";
+        }
     }
 }
 

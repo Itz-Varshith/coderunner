@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class SubmissionDispatcher {
+public class SubmissionDispatcherBash {
 
     private final Map<String, CodeExecutorBash> codeExecutors;
     private final SubmissionRepository submissionRepository;
     private final JudgeBootstrapCompiler judgeBootstrapCompiler;
 
 
-    public SubmissionDispatcher(List<CodeExecutorBash> codeExecutorBashes, SubmissionRepository submissionRepository, JudgeBootstrapCompiler judgeBootstrapCompiler) {
+    public SubmissionDispatcherBash(List<CodeExecutorBash> codeExecutorBashes, SubmissionRepository submissionRepository, JudgeBootstrapCompiler judgeBootstrapCompiler) {
         this.codeExecutors = codeExecutorBashes.stream()
                 .collect(Collectors.toMap(CodeExecutorBash::getLanguage, Function.identity()));
 
