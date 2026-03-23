@@ -1,7 +1,10 @@
 package com.varshith.coderunner_workers.executors.python_executors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.varshith.coderunner_workers.executors.DockerExecutor;
 import com.varshith.coderunner_workers.models.SubmissionModel;
+import com.varshith.coderunner_workers.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +23,8 @@ import java.nio.file.Paths;
 public class CppExecutorPython implements CodeExecutorsPython {
 
     private final DockerExecutor dockerExecutor;
+    // 1. Inject ObjectMapper to parse the JSON file easily
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String getLanguage(){
         return "cpp";
@@ -106,7 +111,40 @@ public class CppExecutorPython implements CodeExecutorsPython {
                             memoryLimitMb;
 
             String result = dockerExecutor.dockerExecutePython(tempDirectory, testCasesLocation, "judge-cpp-python", command);
-            log.info("Done execution");
+            log.info("Done execution, attempting to read result.json");
+
+            // 2. Logic to read result from result.json file
+            Path resultFilePath = tempDirectory.resolve("result.json");
+
+            // Safety check: Did the Python script crash completely before writing the file?
+            if (!Files.exists(resultFilePath)) {
+                log.error("result.json not found! The Docker container might have crashed or the Python script failed to execute properly.");
+                submission.setStatus(SubmissionModel.Status.PENDING);
+                submission.setJudgeMessage("System error: Executor failed to produce a result.");
+                return false;
+            }
+
+            // Parse the JSON directly into a JsonNode object
+            JsonNode resultNode = objectMapper.readTree(resultFilePath.toFile());
+
+            boolean isSystemError = resultNode.path("isSystemError").asBoolean(true);
+            String status = resultNode.path("status").asText("SYSTEM_ERROR");
+            String judgeMessage = resultNode.path("judgeMessage").asText("Unknown Error");
+            int timeTakenMs = resultNode.path("timeTakenMs").asInt(0);
+            int memoryTakenKb = resultNode.path("memoryTakenKb").asInt(0);
+
+            submission.setStatus(SubmissionModel.Status.valueOf(status));
+            submission.setJudgeMessage(judgeMessage);
+            submission.setTimeTaken(timeTakenMs);
+            submission.setMemoryTaken(memoryTakenKb);
+
+            if (isSystemError) {
+                log.error("Execution resulted in a system error: {}", judgeMessage);
+                return false;
+            }
+
+            log.info("Successfully parsed result: Status={}, Time={}ms, Memory={}KB", status, timeTakenMs, memoryTakenKb);
+
             return true;
 
         } catch(Exception err){

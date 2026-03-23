@@ -56,13 +56,13 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
     test_files = sorted([f for f in os.listdir(testcase_dir) if f.endswith(".txt")])
 
     if not test_files:
-        return {
+        return writeToJson({
             "isSystemError": True,
             "status": "SYSTEM_ERROR",
             "judgeMessage": "No testcases found",
             "timeTakenMs": 0,
             "memoryTakenKb": 0
-        }
+        })
 
     max_time = 0
     total_tests = len(test_files)
@@ -90,13 +90,13 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
-                return {
+                return writeToJson({
                     "isSystemError": False,
-                    "status": "TIME_LIMIT_EXCEEDED",
+                    "status": "TLE",
                     "judgeMessage": f"Time limit exceeded on testcase #{idx}",
                     "timeTakenMs": max_time,
                     "memoryTakenKb": 0
-                }
+                })
 
             exec_time = int((time.perf_counter() - start) * 1000)
             max_time = max(max_time, exec_time)
@@ -110,21 +110,21 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
                         "MemoryError" in err or
                         process.returncode in (137, 139)
                 ):
-                    return {
+                    return writeToJson({
                         "isSystemError": False,
-                        "status": "MEMORY_LIMIT_EXCEEDED",
+                        "status": "MLE",
                         "judgeMessage": f"Memory limit exceeded on testcase #{idx}",
                         "timeTakenMs": max_time,
                         "memoryTakenKb": 0
-                    }
+                    })
 
-                return {
+                return writeToJson({
                     "isSystemError": False,
                     "status": "RUNTIME_ERROR",
                     "judgeMessage": f"Runtime error on testcase #{idx}: {err}",
                     "timeTakenMs": max_time,
                     "memoryTakenKb": 0
-                }
+                })
 
             # ------------------ JUDGE ------------------
             judge = subprocess.run(
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     # -------- Compile --------
     ok, err = compile_code(compile_cmd)
     if not ok:
-        print({
+        writeToJson({
             "isSystemError": False,
             "status": "COMPILATION_ERROR",
             "judgeMessage": err,

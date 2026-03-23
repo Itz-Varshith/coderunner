@@ -58,8 +58,11 @@ public class SubmissionDispatcherPython {
             return false;
         }
 
-        return codeExecutorsPython.execute(submission);
-
+        boolean res= codeExecutorsPython.execute(submission);
+        if(res){
+            submissionRepository.save(submission);
+        }
+        return res;
     }
 
 

@@ -56,6 +56,7 @@ public class SubmissionModel {
     private int memoryTaken;
 
     private long submittedAt;
+    @Column(columnDefinition = "TEXT")
     private String judgeMessage;
     @PrePersist
     public void setDefaultValues() {
