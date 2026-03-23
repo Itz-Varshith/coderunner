@@ -94,7 +94,7 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
                     "isSystemError": False,
                     "status": "TLE",
                     "judgeMessage": f"Time limit exceeded on testcase #{idx}",
-                    "timeTakenMs": max_time,
+                    "timeTakenMs": time_limit_ms,
                     "memoryTakenKb": 0
                 })
 
@@ -108,6 +108,7 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
                 if (
                         "OutOfMemoryError" in err or
                         "MemoryError" in err or
+                        "bad_alloc" in err or
                         process.returncode in (137, 139)
                 ):
                     return writeToJson({
@@ -115,7 +116,7 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
                         "status": "MLE",
                         "judgeMessage": f"Memory limit exceeded on testcase #{idx}",
                         "timeTakenMs": max_time,
-                        "memoryTakenKb": 0
+                        "memoryTakenKb": memory_limit_mb*1024
                     })
 
                 return writeToJson({
