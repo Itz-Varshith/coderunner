@@ -37,7 +37,6 @@ public class SubmissionDispatcherPython {
         Long submissionIdLong= Long.parseLong(submissionId);
 
         SubmissionModel submission=submissionRepository.findById(submissionIdLong).orElse(null);
-        System.out.println("Well!");
         if(submission==null){
             log.info("Submission id {} not found", submissionId);
             return false;

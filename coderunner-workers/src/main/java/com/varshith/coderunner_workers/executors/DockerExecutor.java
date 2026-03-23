@@ -140,7 +140,7 @@ public class DockerExecutor {
                 @Override
                 public void onNext(Frame frame) {
                     String log = new String(frame.getPayload());
-                    System.out.print(log); // 🔥 live streaming
+                    System.out.print(log);
                 }
             });
 

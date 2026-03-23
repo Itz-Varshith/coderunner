@@ -22,6 +22,7 @@ import subprocess
 import time
 import resource
 import shlex
+import json
 
 # ------------------ LIMIT SETTER ------------------
 
@@ -39,6 +40,15 @@ def compile_code(cmd):
     if result.returncode != 0:
         return False, result.stderr[:500]
     return True, ""
+
+# ------------------ SAVING TO JSON -------------------
+def writeToJson(var):
+    print("writing")
+    with open("result.json", "w") as file:
+        json.dump(var, file, indent=4)
+    return var
+
+
 
 # ------------------ MAIN EVALUATION ------------------
 
@@ -131,25 +141,25 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
                 if judge_msg:
                     msg += f" ({judge_msg})"
 
-                return {
+                return writeToJson({
                     "isSystemError": False,
                     "status": "WRONG_ANSWER",
                     "judgeMessage": msg,
                     "timeTakenMs": max_time,
                     "memoryTakenKb": 0
-                }
+                })
 
     # ------------------ ACCEPTED ------------------
 
     final_msg = f"Accepted ({total_tests} testcases passed)"
 
-    return {
+    return writeToJson({
         "isSystemError": False,
         "status": "ACCEPTED",
         "judgeMessage": final_msg,
         "timeTakenMs": max_time,
         "memoryTakenKb": 0
-    }
+    });
 
 # ------------------ ENTRY ------------------
 
