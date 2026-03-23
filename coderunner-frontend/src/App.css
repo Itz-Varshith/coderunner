@@ -1,0 +1,703 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0f0f0f;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #888;
+  font-size: 1rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border-radius: 12px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.tabs button:hover {
+  color: #e0e0e0;
+  background: #252525;
+}
+
+.tabs button.active {
+  background: #6366f1;
+  color: white;
+}
+
+.content {
+  background: #1a1a1a;
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.form-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.endpoint {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: #6366f1;
+  background: #6366f115;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ccc;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #0f0f0f;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.form-group textarea {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.5rem;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.form-group input[type="file"] {
+  padding: 0.5rem;
+}
+
+.form-group input[type="file"]::file-selector-button {
+  padding: 0.5rem 1rem;
+  margin-right: 1rem;
+  background: #333;
+  border: none;
+  border-radius: 6px;
+  color: #e0e0e0;
+  cursor: pointer;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.response {
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.response.success {
+  border: 1px solid #22c55e40;
+  background: #22c55e10;
+}
+
+.response.error {
+  border: 1px solid #ef444440;
+  background: #ef444410;
+}
+
+.response-header {
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid #ffffff10;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.response.success .status-badge {
+  background: #22c55e30;
+  color: #22c55e;
+}
+
+.response.error .status-badge {
+  background: #ef444430;
+  color: #ef4444;
+}
+
+.response pre {
+  padding: 1rem;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #ccc;
+}
+
+/* Question Display Styles */
+.question-display {
+  margin-top: 1.5rem;
+  background: #0f0f0f;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #2a2a2a;
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.question-header h3 {
+  font-size: 1.25rem;
+  color: #fff;
+  margin: 0;
+}
+
+.difficulty-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.difficulty-badge.easy {
+  background: #22c55e20;
+  color: #22c55e;
+}
+
+.difficulty-badge.medium {
+  background: #f59e0b20;
+  color: #f59e0b;
+}
+
+.difficulty-badge.hard {
+  background: #ef444420;
+  color: #ef4444;
+}
+
+.question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-size: 0.95rem;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.question-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.topic-tag {
+  padding: 0.25rem 0.625rem;
+  background: #6366f120;
+  color: #6366f1;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.question-markdown {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.question-markdown pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #ccc;
+}
+
+.raw-json {
+  margin-top: 1rem;
+}
+
+.raw-json summary {
+  cursor: pointer;
+  color: #666;
+  font-size: 0.85rem;
+  padding: 0.5rem;
+}
+
+.raw-json summary:hover {
+  color: #888;
+}
+
+.raw-json pre {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: #1a1a1a;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  color: #888;
+}
+
+/* Questions List Styles */
+.questions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.questions-header h2 {
+  margin-bottom: 0.5rem;
+}
+
+.refresh-btn {
+  padding: 0.625rem 1.25rem;
+  background: #333;
+  border: 1px solid #444;
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: #444;
+  border-color: #555;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.questions-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+  min-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .questions-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.questions-list {
+  background: #0f0f0f;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+  overflow: hidden;
+}
+
+.question-item {
+  padding: 1rem;
+  border-bottom: 1px solid #2a2a2a;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.question-item:last-child {
+  border-bottom: none;
+}
+
+.question-item:hover {
+  background: #1a1a1a;
+}
+
+.question-item.selected {
+  background: #6366f115;
+  border-left: 3px solid #6366f1;
+}
+
+.question-title {
+  font-weight: 500;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+.question-id {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.question-detail {
+  background: #0f0f0f;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+  padding: 1.5rem;
+  min-height: 400px;
+}
+
+.question-detail .question-display {
+  margin-top: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.empty-state,
+.loading-state {
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.95rem;
+}
+
+.question-id-full {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+}
+
+.question-id-full code {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #1a1a1a;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: #888;
+  word-break: break-all;
+}
+
+/* Solve button */
+.solve-btn {
+  margin-top: 1.5rem;
+}
+
+/* Submit page question info */
+.submit-question-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #0f0f0f;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #2a2a2a;
+}
+
+.submit-question-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Disabled tab styling */
+.tabs button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Submit page layout with sidebar */
+.submit-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .submit-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.submit-main {
+  min-width: 0;
+}
+
+/* Submissions Sidebar */
+.submissions-sidebar {
+  background: #0f0f0f;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+  padding: 1rem;
+  height: fit-content;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.submissions-sidebar h3 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  color: #fff;
+}
+
+.submissions-sidebar .endpoint {
+  margin-bottom: 1rem;
+  font-size: 0.75rem;
+}
+
+.submissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.submission-item {
+  padding: 0.75rem;
+  background: #1a1a1a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid transparent;
+}
+
+.submission-item:hover {
+  background: #222;
+}
+
+.submission-item.selected {
+  border-color: #6366f1;
+  background: #6366f110;
+}
+
+.submission-question {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.submission-id {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: #6366f1;
+}
+
+.submission-time {
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.empty-state-small {
+  color: #666;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Submission Detail */
+.submission-detail {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+}
+
+.submission-detail-header {
+  margin-bottom: 1rem;
+}
+
+.status-badge-large {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge-large.accepted {
+  background: #22c55e20;
+  color: #22c55e;
+}
+
+.status-badge-large.pending {
+  background: #f59e0b20;
+  color: #f59e0b;
+}
+
+.status-badge-large.rejected {
+  background: #ef444420;
+  color: #ef4444;
+}
+
+.submission-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.judge-message {
+  margin-bottom: 1rem;
+}
+
+.judge-message pre {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: #1a1a1a;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: #ccc;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.submission-meta {
+  font-size: 0.75rem;
+  color: #666;
+}
