@@ -27,6 +27,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+
 public class SubmissionService {
 
     private final SubmissionValidator submissionValidator;
@@ -82,7 +83,12 @@ public class SubmissionService {
                 "submission-stream");
         response.setMessage("Submission successful");
         response.setSuccess(true);
-        response.setData("");
+        response.setData(""+saved.getSubmissionId());
         return response;
+    }
+
+    public SubmissionModel fetchSubmission(String id) {
+        Long idInt=Long.parseLong(id);
+        return submissionRepository.findById(idInt).get();
     }
 }

@@ -1,6 +1,7 @@
 package com.varshith.coderunner.models;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class QuestionModel {
     @Id
     private String questionId;
     private String title;
+    @Column(columnDefinition = "TEXT")
     private String markdown;
     private String testcasesPath;
     private int testcasesCount;

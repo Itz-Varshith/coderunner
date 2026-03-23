@@ -3,6 +3,8 @@ package com.varshith.coderunner.service;
 
 import com.varshith.coderunner.dtos.APIResponse;
 import com.varshith.coderunner.dtos.QuestionCreateRequest;
+import com.varshith.coderunner.dtos.QuestionFetchAllResponse;
+import com.varshith.coderunner.dtos.QuestionFetchResponse;
 import com.varshith.coderunner.helpers.FileSystemHelper;
 import com.varshith.coderunner.helpers.ValidatorResult;
 import com.varshith.coderunner.helpers.QuestionValidator;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -108,5 +111,15 @@ public class QuestionService {
         response.setData(questionId);
 
         return response;
+    }
+
+    public QuestionFetchResponse fetchQuestion(String id) {
+        return new QuestionFetchResponse(questionRepository.findById(id).orElse(null));
+    }
+
+    public QuestionFetchAllResponse fetchAllQuestion() {
+        Map<String, String> response = new java.util.HashMap<>(Map.of());
+        questionRepository.findAll().forEach(question -> {response.put(question.getQuestionId(), question.getTitle());});
+        return new QuestionFetchAllResponse(response);
     }
 }

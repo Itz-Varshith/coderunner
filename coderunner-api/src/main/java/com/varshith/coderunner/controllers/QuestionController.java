@@ -1,9 +1,7 @@
 package com.varshith.coderunner.controllers;
 
 
-import com.varshith.coderunner.dtos.APIResponse;
-import com.varshith.coderunner.dtos.QuestionCreateRequest;
-import com.varshith.coderunner.dtos.QuestionCreateResponse;
+import com.varshith.coderunner.dtos.*;
 import com.varshith.coderunner.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,14 +12,19 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/question")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class QuestionController {
 
     private final QuestionService questionService;
 
 
     @GetMapping("/get/{id}")
-    public QuestionCreateResponse getQuestionFromId(@PathVariable String id){
-        return new QuestionCreateResponse();
+    public QuestionFetchResponse getQuestionFromId(@PathVariable String id){
+        return questionService.fetchQuestion(id);
+    }
+    @GetMapping("/get-all")
+    public QuestionFetchAllResponse getAllQuestion(){
+        return questionService.fetchAllQuestion();
     }
 
     @PostMapping("/create-question")
