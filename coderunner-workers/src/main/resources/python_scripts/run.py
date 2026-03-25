@@ -72,6 +72,7 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
         cnt=cnt+1
         tc_path = os.path.join(testcase_dir, tc)
 
+
         with open(tc_path, "r") as stdin_f:
 
             start = time.perf_counter()
@@ -82,7 +83,7 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                preexec_fn=set_limits(memory_limit_mb)
+                # preexec_fn=set_limits(memory_limit_mb)
             )
 
             try:
