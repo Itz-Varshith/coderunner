@@ -20,30 +20,26 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DifficultyBadge } from '@/components/problems/DifficultyBadge';
+import type { Difficulty } from '@/lib/types';
 
 export function ProblemsPage() {
-  const { data, isLoading, error } = useQuestions();
+  const { data: questions, isLoading, error } = useQuestions();
   const [search, setSearch] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
 
-  const questions = useMemo(() => {
-    if (!data?.question) return [];
-    return Object.entries(data.question).map(([id, title], index) => ({
-      id,
-      title,
-      number: index + 1,
-    }));
-  }, [data]);
-
   const filteredQuestions = useMemo(() => {
-    return questions.filter((q) =>
-      q.title.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [questions, search]);
+    if (!questions) return [];
+    
+    return questions.filter((q) => {
+      const matchesSearch = q.questionTitle.toLowerCase().includes(search.toLowerCase());
+      const matchesDifficulty = difficultyFilter === 'all' || q.difficulty === difficultyFilter;
+      return matchesSearch && matchesDifficulty;
+    });
+  }, [questions, search, difficultyFilter]);
 
   if (error) {
     return (
-      <div className="container px-4 py-8">
+      <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
           Failed to load problems. Please try again later.
         </div>
@@ -52,7 +48,7 @@ export function ProblemsPage() {
   }
 
   return (
-    <div className="container px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Problems</h1>
         <p className="mt-2 text-muted-foreground">
@@ -111,24 +107,24 @@ export function ProblemsPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredQuestions.map((question) => (
-                <TableRow key={question.id} className="cursor-pointer hover:bg-muted/50">
+              filteredQuestions.map((question, index) => (
+                <TableRow key={question.questionId} className="cursor-pointer hover:bg-muted/50">
                   <TableCell className="font-mono text-muted-foreground">
-                    {question.number}
+                    {index + 1}
                   </TableCell>
                   <TableCell>
                     <Link
-                      to={`/problems/${question.id}`}
+                      to={`/problems/${question.questionId}`}
                       className="font-medium hover:text-primary hover:underline"
                     >
-                      {question.title}
+                      {question.questionTitle}
                     </Link>
                   </TableCell>
                   <TableCell className="text-center">
-                    <DifficultyBadge difficulty="MEDIUM" />
+                    <DifficultyBadge difficulty={question.difficulty as Difficulty} />
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    --
+                    {question.acceptanceRate > 0 ? `${question.acceptanceRate.toFixed(1)}%` : '--'}
                   </TableCell>
                 </TableRow>
               ))

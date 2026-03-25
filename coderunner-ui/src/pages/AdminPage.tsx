@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Upload, X, FileArchive, Eye, Edit3, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,8 +68,8 @@ export function AdminPage() {
         toast.error('Please upload a ZIP file');
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('File size must be less than 2MB');
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size must be less than 10MB');
         return;
       }
       setTestCaseFile(file);
@@ -122,7 +123,7 @@ export function AdminPage() {
   };
 
   return (
-    <div className="container px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Create Question</h1>
         <p className="mt-2 text-muted-foreground">
@@ -302,7 +303,7 @@ export function AdminPage() {
                       <Upload className="h-10 w-10 text-muted-foreground" />
                       <p className="font-medium">Upload ZIP file</p>
                       <p className="text-sm text-muted-foreground">
-                        Max 2MB. Must contain testcases/judge.cpp and input files
+                        Max 10MB. Must contain testcases/judge.cpp and input files
                       </p>
                     </div>
                   )}
@@ -356,6 +357,7 @@ Output: [0,1]
                       {markdown ? (
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           <ReactMarkdown
+                            rehypePlugins={[rehypeRaw]}
                             components={{
                               pre: ({ children }) => (
                                 <pre className="rounded-lg bg-muted p-4 overflow-x-auto">

@@ -1,10 +1,13 @@
-import Editor, { loader } from '@monaco-editor/react';
+import { useRef, useEffect } from 'react';
+import Editor, { loader, type Monaco } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import { Loader2 } from 'lucide-react';
 
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   language: string;
+  onSubmit?: () => void;
 }
 
 const languageMap: Record<string, string> = {
@@ -58,7 +61,26 @@ function EditorLoader() {
   );
 }
 
-export function CodeEditor({ value, onChange, language }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, language, onSubmit }: CodeEditorProps) {
+  const onSubmitRef = useRef(onSubmit);
+
+  useEffect(() => {
+    onSubmitRef.current = onSubmit;
+  }, [onSubmit]);
+
+  const handleEditorMount = (editorInstance: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+    editorInstance.addAction({
+      id: 'submit-code',
+      label: 'Submit Code',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      ],
+      run: () => {
+        onSubmitRef.current?.();
+      },
+    });
+  };
+
   return (
     <div className="h-full w-full overflow-hidden rounded-none border-0 bg-[#0a0a0a]">
       <Editor
@@ -69,6 +91,7 @@ export function CodeEditor({ value, onChange, language }: CodeEditorProps) {
         onChange={(val) => onChange(val || '')}
         theme="coderunner-dark"
         loading={<EditorLoader />}
+        onMount={handleEditorMount}
         options={{
           minimap: { enabled: false },
           fontSize: 14,

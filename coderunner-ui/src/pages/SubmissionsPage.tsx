@@ -164,8 +164,8 @@ export function SubmissionsPage() {
   const { data: submissions, isLoading, error, refetch, isRefetching } = useUserSubmissions(USER_ID);
 
   return (
-    <div className="container px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">My Submissions</h1>
           <p className="mt-2 text-muted-foreground">

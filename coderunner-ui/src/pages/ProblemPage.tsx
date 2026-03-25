@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Play, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import { useQuestion } from '@/hooks/useQuestions';
 import { useSubmission, useSubmitCode } from '@/hooks/useSubmission';
 import { Button } from '@/components/ui/button';
@@ -50,8 +51,8 @@ export function ProblemPage() {
     setCode(DEFAULT_CODE[newLang] || '');
   }, []);
 
-  const handleSubmit = async () => {
-    if (!id) return;
+  const handleSubmit = useCallback(async () => {
+    if (!id || submitMutation.isPending || !code.trim()) return;
     try {
       const result = await submitMutation.mutateAsync({
         code,
@@ -65,7 +66,19 @@ export function ProblemPage() {
     } catch (err) {
       console.error('Submission failed:', err);
     }
-  };
+  }, [id, code, language, submitMutation]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSubmit();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSubmit]);
 
   if (error) {
     return (
@@ -97,17 +110,22 @@ export function ProblemPage() {
           )}
           {question && <DifficultyBadge difficulty={question.difficulty} />}
         </div>
-        <Button
-          onClick={handleSubmit}
-          disabled={submitMutation.isPending || !code.trim()}
-        >
-          {submitMutation.isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Play className="mr-2 h-4 w-4" />
-          )}
-          Submit
-        </Button>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-xs text-muted-foreground sm:block">
+            Ctrl + Enter to submit
+          </span>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitMutation.isPending || !code.trim()}
+          >
+            {submitMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="mr-2 h-4 w-4" />
+            )}
+            Submit
+          </Button>
+        </div>
       </div>
 
       <ResizablePanelGroup className="flex-1">
@@ -128,6 +146,7 @@ export function ProblemPage() {
                   ))}
                 </div>
                 <ReactMarkdown
+                  rehypePlugins={[rehypeRaw]}
                   components={{
                     pre: ({ children }) => (
                       <pre className="rounded-lg bg-muted p-4 overflow-x-auto">
@@ -175,6 +194,7 @@ export function ProblemPage() {
                     value={code}
                     onChange={setCode}
                     language={language}
+                    onSubmit={handleSubmit}
                   />
                 </div>
               </div>

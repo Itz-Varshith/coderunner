@@ -16,9 +16,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 // I recently learnt that required args constructor directly converts service injections into constructor based ones.
@@ -117,9 +115,20 @@ public class QuestionService {
         return new QuestionFetchResponse(questionRepository.findById(id).orElse(null));
     }
 
-    public QuestionFetchAllResponse fetchAllQuestion() {
-        Map<String, String> response = new java.util.HashMap<>(Map.of());
-        questionRepository.findAll().forEach(question -> {response.put(question.getQuestionId(), question.getTitle());});
-        return new QuestionFetchAllResponse(response);
+    public List<QuestionFetchAllResponse> fetchAllQuestion() {
+        List<QuestionModel> questions = questionRepository.findAll();
+        List<QuestionFetchAllResponse> response = new ArrayList<>();
+        for (QuestionModel question : questions) {
+            double acceptanceRate = question.getSubmissions() > 0 
+                ? (double) question.getAccepted() / question.getSubmissions() * 100 
+                : 0.0;
+            response.add(new QuestionFetchAllResponse(
+                question.getQuestionId(),
+                question.getTitle(),
+                acceptanceRate,
+                question.getDifficulty().toString()
+            ));
+        }
+        return response;
     }
 }

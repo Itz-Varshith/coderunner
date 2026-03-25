@@ -59,9 +59,14 @@ export interface QuestionFetchResponse {
   questionModel: Question;
 }
 
-export interface QuestionFetchAllResponse {
-  question: Record<string, string>;
+export interface QuestionListItem {
+  questionId: string;
+  questionTitle: string;
+  acceptanceRate: number;
+  difficulty: Difficulty;
 }
+
+export type QuestionFetchAllResponse = QuestionListItem[];
 
 export interface SubmissionCreateRequest {
   code: string;
