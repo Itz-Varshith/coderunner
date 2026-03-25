@@ -6,7 +6,6 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.LogContainerCmd;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
-import com.varshith.coderunner_workers.config.DockerConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -100,8 +99,7 @@ public class DockerExecutor {
             Path directory,
             Path testcasesPath,
             String image_name,
-            String command
-    ) {
+            String command) {
         try {
             dockerClient.pingCmd().exec();
         } catch (Exception e) {

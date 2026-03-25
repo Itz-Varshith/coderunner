@@ -9,6 +9,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
+COPY standard_checker /usr/local/bin/standard_checker
+
+
+RUN chmod +x /usr/local/bin/standard_checker
+
 RUN useradd -m runner
 
 

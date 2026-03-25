@@ -24,6 +24,11 @@ import resource
 import shlex
 import json
 
+
+# ----------------- CHECKER BINARY PATHS ----------
+standard_checker_path="/usr/local/bin/standard_checker"
+
+
 # ------------------ LIMIT SETTER ------------------
 
 def set_limits(memory_limit_mb):
@@ -52,7 +57,7 @@ def writeToJson(var):
 
 # ------------------ MAIN EVALUATION ------------------
 
-def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limit_mb):
+def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limit_mb, checker):
     test_files = sorted([f for f in os.listdir(testcase_dir) if f.endswith(".txt")])
 
     if not test_files:
@@ -129,12 +134,23 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
                 })
 
             # ------------------ JUDGE ------------------
-            judge = subprocess.run(
-                judge_cmd + [tc_path],
-                input=stdout,
-                capture_output=True,
-                text=True
-            )
+            judge=None
+            if checker=="custom_checker" :
+                judge = subprocess.run(
+                    judge_cmd + [tc_path],
+                    input=stdout,
+                    capture_output=True,
+                    text=True
+                )
+            elif checker=="standard_checker":
+                expected_path = tc_path.replace("input", "output")  # adjust if needed
+
+                judge = subprocess.run(
+                    [standard_checker_path, expected_path],
+                    input=stdout,
+                    capture_output=True,
+                    text=True
+                )
 
             judge_msg = (judge.stdout.strip() or judge.stderr.strip())[:200]
 
@@ -166,15 +182,19 @@ def run_evaluation(user_cmd, judge_cmd, testcase_dir, time_limit_ms, memory_limi
 # ------------------ ENTRY ------------------
 
 if __name__ == "__main__":
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 7:
         sys.exit(1)
-
+    checker_map = {
+        "standard": "standard_checker",
+        "custom": "custom_checker"
+    }
     compile_cmd = shlex.split(sys.argv[1])
     user_cmd = shlex.split(sys.argv[2])
     judge_cmd = shlex.split(sys.argv[3])
     time_limit_ms = int(sys.argv[4])
     memory_limit_mb = int(sys.argv[5])
-
+    mode = sys.argv[6]
+    checker=checker_map[mode]
     # -------- Compile --------
     ok, err = compile_code(compile_cmd)
     if not ok:
@@ -193,7 +213,8 @@ if __name__ == "__main__":
         judge_cmd,
         "./testcase/input",
         time_limit_ms,
-        memory_limit_mb
+        memory_limit_mb,
+        checker
     )
 
     print(result)

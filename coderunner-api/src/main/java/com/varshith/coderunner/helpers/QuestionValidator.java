@@ -88,6 +88,7 @@ public boolean validateQuestionDataBytes(MultipartFile file, boolean customJudge
     int judgeFound = 0;
     boolean hasInput = false;
     boolean hasOutput = false;
+    int ipcnt=0, opcnt=0;
 
     try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
         ZipEntry entry;
@@ -112,12 +113,14 @@ public boolean validateQuestionDataBytes(MultipartFile file, boolean customJudge
             // 3. Check for input testcases
             if (name.startsWith("testcases/input/") && name.endsWith(".txt")) {
                 hasInput = true;
+                ipcnt++;
                 continue;
             }
 
             // 4. Check for output testcases
             if (name.startsWith("testcases/output/") && name.endsWith(".txt")) {
                 hasOutput = true;
+                opcnt++;
                 continue;
             }
 
@@ -135,7 +138,7 @@ public boolean validateQuestionDataBytes(MultipartFile file, boolean customJudge
     if (customJudge) {
         return judgeFound == 1 && hasInput;
     } else {
-        return hasInput && hasOutput;
+        return hasInput && hasOutput && ipcnt == opcnt;
     }
 }
 }

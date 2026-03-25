@@ -55,12 +55,15 @@ public class SubmissionDispatcherPython {
         }
 
 
+        if(submission.getQuestion().isCustomJudge()){
+            boolean judgeBootStrapResult= judgeBootstrapCompiler.bootstrapJudgeProgram(submission);
 
-        boolean judgeBootStrapResult= judgeBootstrapCompiler.bootstrapJudgeProgram(submission);
-        if(!judgeBootStrapResult){
-            log.error("Judge program could not be bootstrapped");
-            return false;
+            if(!judgeBootStrapResult){
+                log.error("Judge program could not be bootstrapped");
+                return false;
+            }
         }
+
 
         boolean res= codeExecutorsPython.execute(submission);
         if(res){

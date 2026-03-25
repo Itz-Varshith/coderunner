@@ -101,14 +101,15 @@ public class CppExecutorPython implements CodeExecutorsPython {
 
             int timeLimitMs = submission.getQuestion().getTimeLimit();
             int memoryLimitMb = submission.getQuestion().getMemoryLimit();
-
+            String checkermode=submission.getQuestion().isCustomJudge()?"custom":"standard";
             String command =
                     "python3 -u run.py " +
                             "\"" + compileCmd + "\" " +
                             "\"" + runCmd + "\" " +
                             "\"" + judgeCmd + "\" " +
                             timeLimitMs + " " +
-                            memoryLimitMb;
+                            memoryLimitMb+ " "+ 
+                            checkermode;
 
             String result = dockerExecutor.dockerExecutePython(tempDirectory, testCasesLocation, "judge-cpp-python", command);
             log.info("Done execution, attempting to read result.json");

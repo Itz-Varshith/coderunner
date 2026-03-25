@@ -3,9 +3,7 @@ package com.varshith.coderunner_workers.executors.python_executors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.varshith.coderunner_workers.executors.DockerExecutor;
-import com.varshith.coderunner_workers.helpers.JavaClassNameExtractor;
 import com.varshith.coderunner_workers.models.SubmissionModel;
-import com.varshith.coderunner_workers.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -102,7 +100,7 @@ public class PythonExecutorPy implements CodeExecutorsPython {
             String judgeCmd = "./testcase/judge_program";
 
             int timeLimitMs = submission.getQuestion().getTimeLimit();
-
+            String checkermode=submission.getQuestion().isCustomJudge()?"custom":"standard";
 
             String command =
                     "python3 -u run.py " +
@@ -110,7 +108,7 @@ public class PythonExecutorPy implements CodeExecutorsPython {
                             "\"" + runCmd + "\" " +
                             "\"" + judgeCmd + "\" " +
                             timeLimitMs + " " +
-                            memoryLimitMb;
+                            memoryLimitMb + " " + checkermode;
 
             String result = dockerExecutor.dockerExecutePython(tempDirectory, testCasesLocation, "judge-java-python", command);
             log.info("Done execution, attempting to read result.json");
