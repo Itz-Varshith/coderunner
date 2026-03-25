@@ -72,7 +72,7 @@ public class QuestionValidator {
         }
 
 //        Check for files inside the testcases.zip for correct file format inside the zip.
-        if(!validateQuestionDataBytes((question.getTest_cases()))){
+        if(!validateQuestionDataBytes((question.getTest_cases()), question.isCustomJudge())){
             result.setSecondVariable("Question Test Cases Format invalid");
             return result;
         }
@@ -84,36 +84,58 @@ public class QuestionValidator {
     }
 
 //    Main validator for data inside the files checks for Filenames existence fo judge file and folder structure.
-    public boolean validateQuestionDataBytes(MultipartFile file) {
+public boolean validateQuestionDataBytes(MultipartFile file, boolean customJudge) {
+    int judgeFound = 0;
+    boolean hasInput = false;
+    boolean hasOutput = false;
 
-        int judgeFound = 0;
-        try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
+    try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
+        ZipEntry entry;
 
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (entry.isDirectory()) continue;
-                String name = entry.getName();
-                System.out.println("File inside zip: " + name);
+        while ((entry = zis.getNextEntry()) != null) {
+            if (entry.isDirectory()) continue;
 
-                // judge.cpp
-                if (name.equals("testcases/judge.cpp")) {
-                    judgeFound++;
-                    continue;
-                }
+            String name = entry.getName();
+            System.out.println("File inside zip: " + name);
 
-                // input testcases
-                if (name.startsWith("testcases/input/") && name.endsWith(".txt")) {
-                    continue;
-                }
-
-                return false;
+            // 1. Ignore hidden OS files (Crucial for Mac users)
+            if (name.contains("__MACOSX") || name.contains(".DS_Store")) {
+                continue;
             }
 
-        } catch (IOException err) {
+            // 2. Check for judge.cpp
+            if (name.equals("testcases/judge.cpp")) {
+                judgeFound++;
+                continue;
+            }
+
+            // 3. Check for input testcases
+            if (name.startsWith("testcases/input/") && name.endsWith(".txt")) {
+                hasInput = true;
+                continue;
+            }
+
+            // 4. Check for output testcases
+            if (name.startsWith("testcases/output/") && name.endsWith(".txt")) {
+                hasOutput = true;
+                continue;
+            }
+
+            // If the file is none of the above, it's an invalid file format
             return false;
         }
 
-        return (judgeFound==1);
+    } catch (IOException err) {
+        System.err.println("Error parsing zip file: " + err.getMessage());
+        return false;
     }
 
+
+
+    if (customJudge) {
+        return judgeFound == 1 && hasInput;
+    } else {
+        return hasInput && hasOutput;
+    }
+}
 }

@@ -43,4 +43,5 @@ public class QuestionModel {
     private int memoryLimit;
     private List<String> topics;
     private Difficulty difficulty;
+    private boolean customJudge;
 }

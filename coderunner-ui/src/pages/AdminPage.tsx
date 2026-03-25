@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -47,6 +48,7 @@ export function AdminPage() {
   const [topics, setTopics] = useState<string[]>([]);
   const [topicInput, setTopicInput] = useState('');
   const [testCaseFile, setTestCaseFile] = useState<File | null>(null);
+  const [customJudge, setCustomJudge] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddTopic = useCallback(() => {
@@ -103,6 +105,7 @@ export function AdminPage() {
       formData.append('memory_limit', memoryLimit);
       formData.append('topics', JSON.stringify(topics));
       formData.append('test_cases', testCaseFile);
+      formData.append('customJudge', String(customJudge));
 
       await api.createQuestion(formData);
       toast.success('Question created successfully!');
@@ -114,6 +117,7 @@ export function AdminPage() {
       setMemoryLimit('256');
       setTopics([]);
       setTestCaseFile(null);
+      setCustomJudge(false);
     } catch (error) {
       toast.error('Failed to create question');
       console.error(error);
@@ -193,6 +197,23 @@ export function AdminPage() {
                     />
                   </div>
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="customJudge"
+                    checked={customJudge}
+                    onCheckedChange={(checked) => setCustomJudge(checked === true)}
+                  />
+                  <Label
+                    htmlFor="customJudge"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Custom Judge
+                  </Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Enable if this problem uses a custom judge (judge.cpp) for output validation
+                </p>
               </CardContent>
             </Card>
 

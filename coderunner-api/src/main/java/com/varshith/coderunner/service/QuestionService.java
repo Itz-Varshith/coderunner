@@ -91,7 +91,8 @@ public class QuestionService {
                         (int)questionCreateRequest.getTime_limit()*1000,
                         questionCreateRequest.getMemory_limit(),
                         questionCreateRequest.getTopics(),
-                        QuestionModel.Difficulty.valueOf(questionCreateRequest.getDifficulty())
+                        QuestionModel.Difficulty.valueOf(questionCreateRequest.getDifficulty()),
+                        questionCreateRequest.isCustomJudge()
                 )
         );
         // Saving to db done now move from temp to real location

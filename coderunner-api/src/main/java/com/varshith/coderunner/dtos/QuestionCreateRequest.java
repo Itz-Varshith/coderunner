@@ -19,5 +19,6 @@ public class QuestionCreateRequest {
     private List<String> topics;
     private String difficulty;
     private MultipartFile test_cases;
+    private boolean customJudge;
 
 }
