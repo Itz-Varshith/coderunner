@@ -50,7 +50,9 @@ export const api = {
   },
 
   getSubmissionsByUser: async (userId: string): Promise<Submission[]> => {
-    const response = await fetch(`${API_BASE}/submit/user/${userId}`);
+    const response = await fetch(
+      `${API_BASE}/submit/all-submissions/${encodeURIComponent(userId)}`
+    );
     return handleResponse(response);
   },
 };
