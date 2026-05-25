@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -94,5 +95,18 @@ public class SubmissionService {
     public SubmissionModel fetchSubmission(String id) {
         Long idInt=Long.parseLong(id);
         return submissionRepository.findById(idInt).get();
+    }
+
+    public APIResponse<List<SubmissionModel>> getAllSubmissions(String userId) {
+        APIResponse<List<SubmissionModel>> response = new APIResponse<>();
+
+        response.setSuccess(false);
+        response.setDate(new Date());
+
+        List<SubmissionModel> res=submissionRepository.findByUserId(userId);
+
+        response.setData(res);
+        response.setSuccess(true);
+        return response;
     }
 }

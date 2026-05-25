@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 /*
@@ -40,5 +39,16 @@ public class SubmissionController {
     @GetMapping("/details/{id}")
     public SubmissionModel fetchSubmissionDetails(@PathVariable String id) {
         return submissionService.fetchSubmission(id);
+    }
+
+
+    @GetMapping("/all-submissions/{userId}")
+    public ResponseEntity<List<SubmissionModel>> fetchAllSubmissions(@PathVariable String userId) {
+        APIResponse<List<SubmissionModel>> response=submissionService.getAllSubmissions(userId);
+        if(!response.isSuccess()) {
+            return new ResponseEntity<>(response.getData(), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(response.getData(), HttpStatus.OK);
     }
 }
