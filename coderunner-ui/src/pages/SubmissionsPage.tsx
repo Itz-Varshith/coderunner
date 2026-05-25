@@ -163,13 +163,19 @@ function SubmissionCard({ submission }: { submission: Submission }) {
 export function SubmissionsPage() {
   const { data: submissions, isLoading, error, refetch, isRefetching } = useUserSubmissions(USER_ID);
 
+  const sortedSubmissions = submissions
+    ? [...submissions].sort((a, b) => b.submittedAt - a.submittedAt)
+    : [];
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">My Submissions</h1>
           <p className="mt-2 text-muted-foreground">
-            View your submission history and results
+            {sortedSubmissions.length > 0
+              ? `${sortedSubmissions.length} submission${sortedSubmissions.length === 1 ? '' : 's'}`
+              : 'View your submission history and results'}
           </p>
         </div>
         <Button
@@ -205,14 +211,14 @@ export function SubmissionsPage() {
                 </CardHeader>
               </Card>
             ))
-          ) : !submissions || submissions.length === 0 ? (
+          ) : sortedSubmissions.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground">
               <Code2 className="mx-auto h-12 w-12 opacity-50" />
               <p className="mt-4">No submissions yet</p>
               <p className="text-sm">Solve some problems to see your submissions here</p>
             </div>
           ) : (
-            submissions.map((submission) => (
+            sortedSubmissions.map((submission) => (
               <SubmissionCard key={submission.submissionId} submission={submission} />
             ))
           )}
