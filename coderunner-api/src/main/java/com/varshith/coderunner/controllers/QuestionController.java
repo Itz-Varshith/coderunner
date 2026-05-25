@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+/*
+* Main rest end point for all question related things like fetch and create, this also has endpoint for upload of question data.
+* */
 @RestController
 @RequestMapping("/question")
 @RequiredArgsConstructor

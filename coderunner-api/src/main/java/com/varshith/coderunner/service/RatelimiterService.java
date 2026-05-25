@@ -6,6 +6,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 
+/*
+* Rate limiter class uses a simple time based rate limiter where if a user submits four times within a single second, return false and then the user request gets reverted.
+* */
+
 @Service
 @RequiredArgsConstructor
 public class RatelimiterService {

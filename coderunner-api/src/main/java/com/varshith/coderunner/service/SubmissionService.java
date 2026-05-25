@@ -28,6 +28,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 
+/*
+* Submission Service class does all the work of creating submissions and  persisting them to database and enqueueing them to redist stream for checking.
+* */
+
 public class SubmissionService {
 
     private final SubmissionValidator submissionValidator;

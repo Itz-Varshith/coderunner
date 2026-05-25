@@ -13,6 +13,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
+/*
+* Main endpoint for submission creation and fetching submission details.
+*
+* Improvement that can be performed here is that currently the server does not have any sort of server sent events or socket established for quick relay of the test results or something, but in the future we can implement a clean SSE pattern here to have real time updates quick.
+* */
+
 @RestController
 @RequestMapping("/submit")
 @RequiredArgsConstructor

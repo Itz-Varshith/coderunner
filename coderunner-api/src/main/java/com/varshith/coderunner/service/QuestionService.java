@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Path;
 import java.util.*;
 
+/*
+* Question Service class main entry point for the creation of questions, takes many variables ensures every required value is set.
+* */
 
 // I recently learnt that required args constructor directly converts service injections into constructor based ones.
 @Service

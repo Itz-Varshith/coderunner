@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+/*
+* Interceptor class for rate limiter, this class intercepts every request to select end points and returns false if the corresponding service does not accept the user.
+* */
+
 @Component
 @RequiredArgsConstructor
 public class RateLimiterInterceptor implements HandlerInterceptor {
