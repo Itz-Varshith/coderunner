@@ -1,6 +1,5 @@
 package com.varshith.coderunner.config;
 
-
 import com.varshith.coderunner.interceptor.RateLimiterInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

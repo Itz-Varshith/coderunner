@@ -23,13 +23,13 @@ public class RateLimiterInterceptor implements HandlerInterceptor {
                              HttpServletResponse response,
                              Object handler) throws Exception {
 
-        String ip = request.getRemoteAddr();
-
-        if (!ratelimiterService.checkRequest(ip)) {
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.getWriter().write("Too many requests");
-            return false;
-        }
+//        String ip = request.getRemoteAddr();
+//
+//        if (!ratelimiterService.checkRequest(ip)) {
+//            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+//            response.getWriter().write("Too many requests");
+//            return false;
+//        }
 
         return true;
     }
