@@ -1,4 +1,12 @@
 # CodeRunner - Load Test Report
+### Test Environment
+
+All benchmarks were executed on a single machine with 16 GB RAM and 12 CPU cores. The same host simultaneously ran the API services (2 Spring Boot applications), PostgreSQL, Redis, Docker daemon, background workers, and the Locust load generator.
+
+As a result, all components competed for the same CPU, memory, and I/O resources during testing. The reported latencies therefore represent performance under a resource-constrained single-host setup rather than a production-style deployment where infrastructure components would typically be isolated across multiple machines or containers.
+
+Consequently, the benchmark results should be considered a conservative estimate of system performance, and lower latencies can be expected in a dedicated production environment.
+
 
 _Generated: **2026-06-10 21:15:39**_ - all numbers are produced by [Locust](https://locust.io/) in headless mode from a single host against `http://localhost:8081` with the workers consuming the `submission-stream` Redis stream live.
 
