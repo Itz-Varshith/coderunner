@@ -6,7 +6,9 @@ import com.varshith.coderunner_workers.models.QuestionModel;
 import com.varshith.coderunner_workers.models.SubmissionModel;
 import com.varshith.coderunner_workers.repository.QuestionRepository;
 import com.varshith.coderunner_workers.repository.SubmissionRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,15 +24,17 @@ public class SubmissionDispatcherPython {
     private final SubmissionRepository submissionRepository;
     private final JudgeBootstrapCompiler judgeBootstrapCompiler;
     private final QuestionRepository questionRepository;
+    private final RedisTemplate<Object, Object> redisTemplate;
 
 
-    public SubmissionDispatcherPython(List<CodeExecutorsPython> codeExecutorBashes, SubmissionRepository submissionRepository, JudgeBootstrapCompiler judgeBootstrapCompiler, QuestionRepository questionRepository) {
+    public SubmissionDispatcherPython(List<CodeExecutorsPython> codeExecutorBashes, SubmissionRepository submissionRepository, JudgeBootstrapCompiler judgeBootstrapCompiler, QuestionRepository questionRepository, RedisTemplate<Object, Object> redisTemplate) {
         this.codeExecutors = codeExecutorBashes.stream()
                 .collect(Collectors.toMap(CodeExecutorsPython::getLanguage, Function.identity()));
 
         this.submissionRepository = submissionRepository;
         this.judgeBootstrapCompiler= judgeBootstrapCompiler;
         this.questionRepository = questionRepository;
+        this.redisTemplate = redisTemplate;
     }
 
 
@@ -67,6 +71,7 @@ public class SubmissionDispatcherPython {
 
         boolean res= codeExecutorsPython.execute(submission);
         if(res){
+            redisTemplate.opsForValue().set(submissionIdLong.toString(),submission);
             submissionRepository.save(submission);
             int acceptedInc = 0;
             if(submission.getStatus()==SubmissionModel.Status.valueOf("ACCEPTED")){

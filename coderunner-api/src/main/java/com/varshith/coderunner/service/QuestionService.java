@@ -11,11 +11,14 @@ import com.varshith.coderunner.helpers.QuestionValidator;
 import com.varshith.coderunner.models.QuestionModel;
 import com.varshith.coderunner.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.*;
 
 /*
@@ -25,6 +28,7 @@ import java.util.*;
 // I recently learnt that required args constructor directly converts service injections into constructor based ones.
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuestionService {
 
     @Value("${spring.testcases.base_path}")
@@ -34,6 +38,14 @@ public class QuestionService {
     private final QuestionValidator questionValidator;
     private final FileSystemHelper fileSystemHelper;
     private final QuestionRepository questionRepository;
+    private final RedisTemplate<String, Object> cacheRedisTemplate;
+
+    private static final Duration QUESTION_TTL = Duration.ofMinutes(10);
+    private static final String ALL_QUESTIONS_KEY = "questions:all";
+
+    private static String questionKey(String id) {
+        return "question:" + id;
+    }
 
 
 
@@ -108,6 +120,13 @@ public class QuestionService {
             response.setData("Filesystem error while moving extracted files");
             return response;
         }
+        // Invalidate the cached question list so the new question appears immediately.
+        try {
+            cacheRedisTemplate.delete(ALL_QUESTIONS_KEY);
+        } catch (Exception e) {
+            log.warn("Failed to evict cached question list after creating {}", questionId, e);
+        }
+
         response.setSuccess(true);
         response.setMessage("Question created successfully");
         response.setData(questionId);
@@ -116,10 +135,37 @@ public class QuestionService {
     }
 
     public QuestionFetchResponse fetchQuestion(String id) {
-        return new QuestionFetchResponse(questionRepository.findById(id).orElse(null));
+        String cacheKey = questionKey(id);
+
+        // Cache hit: serve the question directly from Redis.
+        Object cached = cacheRedisTemplate.opsForValue().get(cacheKey);
+        if (cached instanceof QuestionModel question) {
+            log.info("Question {} served from Redis cache", id);
+            return new QuestionFetchResponse(question);
+        }
+
+        // Cache miss: load from the database and warm the cache.
+        QuestionModel question = questionRepository.findById(id).orElse(null);
+        if (question != null) {
+            try {
+                cacheRedisTemplate.opsForValue().set(cacheKey, question, QUESTION_TTL);
+                log.info("Question {} loaded from database and cached", id);
+            } catch (Exception e) {
+                log.warn("Failed to cache question {}", id, e);
+            }
+        }
+        return new QuestionFetchResponse(question);
     }
 
+    @SuppressWarnings("unchecked")
     public List<QuestionFetchAllResponse> fetchAllQuestion() {
+        // Cache hit: serve the full question list directly from Redis.
+        Object cached = cacheRedisTemplate.opsForValue().get(ALL_QUESTIONS_KEY);
+        if (cached instanceof List<?> cachedList) {
+            log.info("All questions served from Redis cache");
+            return (List<QuestionFetchAllResponse>) cachedList;
+        }
+
         List<QuestionModel> questions = questionRepository.findAll();
         List<QuestionFetchAllResponse> response = new ArrayList<>();
         for (QuestionModel question : questions) {
@@ -132,6 +178,13 @@ public class QuestionService {
                 acceptanceRate,
                 question.getDifficulty().toString()
             ));
+        }
+
+        try {
+            cacheRedisTemplate.opsForValue().set(ALL_QUESTIONS_KEY, response, QUESTION_TTL);
+            log.info("All questions loaded from database and cached");
+        } catch (Exception e) {
+            log.warn("Failed to cache all questions", e);
         }
         return response;
     }

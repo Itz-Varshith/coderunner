@@ -17,5 +17,8 @@ import java.util.List;
 public interface SubmissionRepository extends JpaRepository<@NonNull SubmissionModel, @NonNull Long> {
     List<SubmissionModel> findByUserId(String userId);
 
+    // Most recent 50 submissions for a user, used by the cached all-submissions endpoint.
+    List<SubmissionModel> findTop50ByUserIdOrderBySubmittedAtDesc(String userId);
+
     String user(UserModel user);
 }

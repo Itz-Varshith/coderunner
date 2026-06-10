@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,14 @@ public class SubmissionService {
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<Object, Object> objectRedisTemplate;
+    private final RedisTemplate<String, Object> cacheRedisTemplate;
+
+    private static final Duration USER_SUBMISSIONS_TTL = Duration.ofMinutes(5);
+
+    private static String userSubmissionsKey(String userId) {
+        return "submissions:user:" + userId;
+    }
 
     public APIResponse<String> createSubmission(SubmissionCreateRequest submissionCreateRequest) {
         APIResponse<String> response = new APIResponse<>();
@@ -76,6 +85,13 @@ public class SubmissionService {
         SubmissionModel saved = submissionRepository.save(submissionModel);
         log.info("Submission {} saved to database", saved.getSubmissionId());
 
+        // Invalidate the user's cached submission list so the new submission shows up immediately.
+        try {
+            cacheRedisTemplate.delete(userSubmissionsKey(submissionCreateRequest.getUserId().trim()));
+        } catch (Exception e) {
+            log.warn("Failed to evict cached submissions for user {}", submissionCreateRequest.getUserId(), e);
+        }
+
         // Step - 3
         Map<String, String> message=new HashMap<>();
         message.put("submissionId", String.valueOf(saved.getSubmissionId()));
@@ -93,17 +109,55 @@ public class SubmissionService {
     }
 
     public SubmissionModel fetchSubmission(String id) {
-        Long idInt=Long.parseLong(id);
-        return submissionRepository.findById(idInt).get();
+        Long idLong = Long.parseLong(id);
+
+        // Cache hit: the template deserializes straight into a SubmissionModel.
+        Object cached = objectRedisTemplate.opsForValue().get(id);
+        if (cached instanceof SubmissionModel submission) {
+            log.info("Submission {} served from Redis cache", id);
+            return submission;
+        }
+
+        // Cache miss: load from the database and warm the cache for subsequent reads.
+        SubmissionModel submission = submissionRepository.findById(idLong).orElse(null);
+        if (submission != null) {
+            try {
+                objectRedisTemplate.opsForValue().set(id, submission);
+                log.info("Submission {} loaded from database and cached", id);
+            } catch (Exception e) {
+                log.warn("Failed to cache submission {} after database fetch", id, e);
+            }
+        }
+
+        return submission;
     }
 
+    @SuppressWarnings("unchecked")
     public APIResponse<List<SubmissionModel>> getAllSubmissions(String userId) {
         APIResponse<List<SubmissionModel>> response = new APIResponse<>();
 
         response.setSuccess(false);
         response.setDate(new Date());
 
-        List<SubmissionModel> res=submissionRepository.findByUserId(userId);
+        String cacheKey = userSubmissionsKey(userId);
+
+        // Cache hit: serve the user's submission list directly from Redis.
+        Object cached = cacheRedisTemplate.opsForValue().get(cacheKey);
+        if (cached instanceof List<?> cachedList) {
+            response.setData((List<SubmissionModel>) cachedList);
+            response.setSuccess(true);
+            log.info("Submissions for user {} served from Redis cache", userId);
+            return response;
+        }
+
+        // Cache miss: fetch the latest 50 from the database and warm the cache.
+        List<SubmissionModel> res = submissionRepository.findTop50ByUserIdOrderBySubmittedAtDesc(userId);
+        try {
+            cacheRedisTemplate.opsForValue().set(cacheKey, res, USER_SUBMISSIONS_TTL);
+            log.info("Submissions for user {} loaded from database and cached", userId);
+        } catch (Exception e) {
+            log.warn("Failed to cache submissions for user {}", userId, e);
+        }
 
         response.setData(res);
         response.setSuccess(true);
