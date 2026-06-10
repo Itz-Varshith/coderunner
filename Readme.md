@@ -9,6 +9,22 @@
 
 ---
 
+## Performance Summary
+
+Benchmarked with [Locust](https://locust.io/) (headless) against `http://localhost:8081`, with workers consuming the live `submission-stream`. Across read, write, and mixed workloads the system sustained **30-90 requests/sec with p95 latencies of 10-22 ms and zero failures**.
+
+| Scenario | Requests | Throughput | p50 | p95 | Failures |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Read-heavy browsing | 2,910 | 49.3 RPS | 4 ms | 10 ms | 0 |
+| Submit burst | 5,361 | 90.7 RPS | 13 ms | 22 ms | 0 |
+| Mixed realistic flow | 2,797 | 31.4 RPS | 5 ms | 14 ms | 0 |
+
+**Test environment:** a single machine (16 GB RAM, 12 CPU cores) ran *everything* at once - both Spring Boot APIs, PostgreSQL, Redis, the Docker daemon, the background workers, and the Locust load generator. Because all components contended for the same resources, these figures are a **conservative, single-host estimate**; a production deployment with isolated infrastructure should do better. Redis read-through / write-through caching is what keeps hot reads in the single-digit-millisecond range.
+
+See [Load_Test_Summary.md](Load_Test_Summary.md) for the full per-endpoint breakdown and methodology.
+
+---
+
 ## Overview
 
 CodeRunner is a production-ready code execution platform similar to LeetCode, Codeforces, or HackerRank. It provides a scalable architecture for:
